@@ -3,4 +3,3 @@ dist/
 *.log
 .DS_Store
 taskflow-api/
-data/todos.json
