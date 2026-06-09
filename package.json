@@ -1,0 +1,20 @@
+{
+  "name": "type-safe-todo",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "eslint .",
+    "todo": "tsx src/todo.ts",
+    "drills": "tsx src/drills.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.4.0",
+    "@types/node": "^20.14.10",
+    "eslint": "^9.4.0",
+    "tsx": "^4.16.2",
+    "typescript-eslint": "^8.34.0",
+    "typescript": "^5.5.3"
+  }
+}
