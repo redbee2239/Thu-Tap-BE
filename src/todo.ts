@@ -13,7 +13,9 @@ type Command =
   | { name: "add"; title: string }
   | { name: "list" }
   | { name: "done"; id: number }
-  | { name: "remove"; id: number };
+  | { name: "remove"; id: number }
+  | { name: "update"; id: number; title: string }
+  | { name: "search"; keyword: string };
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const todoFilePath = resolve(projectRoot, "data", "todos.json");
@@ -21,9 +23,9 @@ const todoFilePath = resolve(projectRoot, "data", "todos.json");
 async function readTodos(): Promise<Todo[]> {
   try {
     const content = await readFile(todoFilePath, "utf8");
-    return parseTodos(JSON.parse(content) as unknown);
+    return parseTodos(JSON.parse(content));
   } catch (error) {
-    if (isNodeError(error) && error.code === "ENOENT") {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
       return [];
     }
     throw error;
@@ -50,11 +52,11 @@ function parseTodos(value: unknown): Todo[] {
 }
 
 function parseTodo(value: unknown): Todo {
-  if (!isRecord(value)) {
+  if (typeof value !== "object" || value === null) {
     throw new Error("todo item must be an object");
   }
 
-  const { id, title, done, createdAt } = value;
+  const { id, title, done, createdAt } = value as Record<string, unknown>;
 
   if (typeof id !== "number" || !Number.isInteger(id)) {
     throw new Error("todo.id must be an integer");
@@ -70,14 +72,6 @@ function parseTodo(value: unknown): Todo {
   }
 
   return { id, title, done, createdAt };
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function isNodeError(error: unknown): error is NodeJS.ErrnoException {
-  return error instanceof Error && "code" in error;
 }
 
 function parseCommand(args: readonly string[]): Command {
@@ -97,12 +91,27 @@ function parseCommand(args: readonly string[]): Command {
       return { name: "done", id: parseId(rest[0], "done") };
     case "remove":
       return { name: "remove", id: parseId(rest[0], "remove") };
+    case "update": {
+      const id = parseId(rest[0], "update");
+      const title = rest.slice(1).join(" ").trim();
+      if (title === "") {
+        throw new Error("Usage: todo update <id> <title>");
+      }
+      return { name: "update", id, title };
+    }
+    case "search": {
+      const keyword = rest.join(" ").trim();
+      if (keyword === "") {
+        throw new Error("Usage: todo search <keyword>");
+      }
+      return { name: "search", keyword };
+    }
     default:
-      throw new Error("Usage: todo <add|list|done|remove>");
+      throw new Error("Usage: todo <add|list|done|remove|update|search>");
   }
 }
 
-function parseId(value: string | undefined, command: "done" | "remove"): number {
+function parseId(value: string | undefined, command: "done" | "remove" | "update"): number {
   const id = Number(value);
   if (!Number.isInteger(id) || id < 1) {
     throw new Error(`Usage: todo ${command} <id>`);
@@ -111,7 +120,13 @@ function parseId(value: string | undefined, command: "done" | "remove"): number 
 }
 
 function nextId(todos: readonly Todo[]): number {
-  return todos.reduce((maxId, todo) => Math.max(maxId, todo.id), 0) + 1;
+  let maxId = 0;
+  for (const todo of todos) {
+    if (todo.id > maxId) {
+      maxId = todo.id;
+    }
+  }
+  return maxId + 1;
 }
 
 function formatTodo(todo: Todo): string {
@@ -162,6 +177,29 @@ async function handleCommand(command: Command): Promise<void> {
       }
       await writeTodos(updatedTodos);
       console.log(`Removed #${command.id}`);
+      return;
+    }
+    case "update": {
+      const index = todos.findIndex((todo) => todo.id === command.id);
+      if (index === -1) {
+        throw new Error(`Todo #${command.id} not found`);
+      }
+      const updatedTodos = [...todos];
+      updatedTodos[index] = { ...updatedTodos[index], title: command.title };
+      await writeTodos(updatedTodos);
+      console.log(`Updated #${command.id}: ${command.title}`);
+      return;
+    }
+    case "search": {
+      const keyword = command.keyword.toLowerCase();
+      const results = todos.filter((todo) =>
+        todo.title.toLowerCase().includes(keyword)
+      );
+      if (results.length === 0) {
+        console.log("No matching todos.");
+        return;
+      }
+      console.log(results.map(formatTodo).join("\n"));
       return;
     }
   }

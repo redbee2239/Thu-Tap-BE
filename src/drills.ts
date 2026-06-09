@@ -62,7 +62,7 @@ const users: User[] = [
 ];
 
 const groupedUsers = groupBy(users, (user) => user.role);
-const previews: UserPreview[] = users.map(({ id, name }) => ({ id, name }));
+const userPreviews: UserPreview[] = users.map(({ id, name }) => ({ id, name }));
 
 console.log("Grouped users:", groupedUsers);
-console.log("User previews:", previews);
+console.log("User previews:", userPreviews);
