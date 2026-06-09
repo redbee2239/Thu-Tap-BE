@@ -6,6 +6,8 @@ Project thuc hanh TypeScript strict mode: CLI quan ly todo, luu du lieu vao file
 
 ```bash
 npm install
+npm install -g typescript
+npm init @eslint/config@latest
 ```
 
 ## Kiem tra type
