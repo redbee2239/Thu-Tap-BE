@@ -17,7 +17,7 @@ npm run build
 ## Chay CLI
 
 ```bash
-npm run todo -- add "Hoc TypeScript strict"
+npm run todo -- add "Thuc-Tap"
 npm run todo -- list
 npm run todo -- done 1
 npm run todo -- remove 1
