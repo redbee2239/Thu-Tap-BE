@@ -115,7 +115,7 @@ function nextId(todos: readonly Todo[]): number {
 }
 
 function formatTodo(todo: Todo): string {
-  const marker = todo.done ? "x" : " ";
+  const marker = todo.done ? "v" : " ";
   return `${todo.id}. [${marker}] ${todo.title} (${todo.createdAt})`;
 }
 
