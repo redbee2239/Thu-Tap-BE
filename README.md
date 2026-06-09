@@ -21,8 +21,8 @@ npm run build
 ```bash
 npm run todo -- add "Thuc-Tap"
 npm run todo -- list
-npm run todo -- done 1
-npm run todo -- remove 1
+npm run todo -- done id
+npm run todo -- remove id
 ```
 
 Du lieu duoc luu tai `data/todos.json`. Neu file chua ton tai, chuong trinh tu tao danh sach rong.
