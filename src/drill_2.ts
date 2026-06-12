@@ -9,6 +9,7 @@ export async function retry<T>(fn: () => Promise<T>, times: number): Promise<T> 
     try {
       return await fn();
     } catch (error) {
+      console.log(`  -> Attempt ${attempt} failed: ${error instanceof Error ? error.message : error}`);
       lastError = error;
     }
   }
@@ -26,7 +27,7 @@ async function demoRetry() {
       throw new Error(`Attempt ${count} failed`);
     }
     return `Success after ${count} tries`;
-  }, 5);
+  }, 10);
 
   console.log("=== Drill 2: retry ===");
   console.log(result);

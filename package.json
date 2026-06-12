@@ -7,9 +7,9 @@
     "build": "tsc --noEmit",
     "lint": "eslint .",
     "todo": "tsx src/todo.ts",
-    "drill:1": "tsx src/drill_1.ts",
-    "drill:2": "tsx src/drill_2.ts",
-    "drill:3": "tsx src/drill_3.ts"
+    "drill_1": "tsx src/drill_1.ts",
+    "drill_2": "tsx src/drill_2.ts",
+    "drill_3": "tsx src/drill_3.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.4.0",
