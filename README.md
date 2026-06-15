@@ -30,5 +30,7 @@ Du lieu duoc luu tai `data/todos.json`. Neu file chua ton tai, chuong trinh tu t
 ## Chay drills
 
 ```bash
-npm run drills
+npm run drill_1
+npm run drill_2
+npm run drill_3
 ```
