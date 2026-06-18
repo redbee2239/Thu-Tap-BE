@@ -51,16 +51,6 @@ npm run drill:events
 npm run drill:compare
 ```
 
-## Cấu trúc thư mục
-
-```
-.
-├── server/index.js    # HTTP Server
-├── lib/
-│   ├── config.js      # Cấu hình (PORT, HOST, ...)
-│   └── logger.js      # Logger utility
-└── drills/            # Bài tập thực hành
-```
 
 ## Biến môi trường
 
