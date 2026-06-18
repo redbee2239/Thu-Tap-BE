@@ -52,11 +52,3 @@ npm run drill:compare
 ```
 
 
-## Biến môi trường
-
-| Biên | Mặc định | Mô tả |
-|------|----------|-------|
-| PORT | 3000 | Cổng server |
-| HOST | 127.0.0.1 | Địa chỉ host |
-| NODE_ENV | development | Môi trường chạy |
-| LOG_LEVEL | info | Level log (error/warn/info/debug) |
