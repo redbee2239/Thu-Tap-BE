@@ -1,0 +1,16 @@
+{
+  "name": "tuan2-nodejs-core",
+  "version": "1.0.0",
+  "description": "Node.js Core & Async Programming - Week 2",
+  "main": "server/index.js",
+  "scripts": {
+    "drill:lines": "node drills/01-count-lines.js",
+    "drill:events": "node drills/02-event-emitter.js",
+    "drill:compare": "node drills/03-read-compare.js",
+    "start": "node server/index.js",
+    "generate:large-file": "node -e \"require('fs').writeFileSync('large-file.txt', Array(5e6).fill('line\\n').join(''))\""
+  },
+  "dependencies": {
+    "node.js": "^0.0.1-security"
+  }
+}
