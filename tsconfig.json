@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",                          /* Phiên bản JavaScript đầu ra */
+    "module": "NodeNext",                        /* Quy định tiêu chuẩn Module */
+    "moduleResolution": "NodeNext",              /* ĐỒNG BỘ: Sửa triệt để lỗi TS5109 */
+    "esModuleInterop": true,                     /* Cho phép import các thư viện CommonJS như bcrypt, jwt */
+    "forceConsistentCasingInFileNames": true,    /* Bắt buộc viết hoa/thường chuẩn tên file */
+    "strict": true,                              /* Bật kiểm tra kiểu dữ liệu nghiêm ngặt */
+    "skipLibCheck": true                         /* Bỏ qua kiểm tra lỗi kiểu dữ liệu bên trong node_modules */
+  }
+}
