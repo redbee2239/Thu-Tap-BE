@@ -1,38 +1,22 @@
 {
-  "name": "taskflow-week6",
+  "name": "taskflow-testing-week-7",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "db:migrate": "prisma migrate dev",
-    "db:seed": "prisma db seed",
-    "db:reset": "prisma migrate reset --force"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.8.0",
-    "@prisma/client": "^7.8.0",
-    "bcrypt": "^5.1.1",
-    "dotenv": "^16.4.7",
-    "express": "^5.1.0",
-    "helmet": "^8.0.0",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.22.0",
-    "pino": "^9.6.0",
-    "pino-pretty": "^13.0.0",
-    "zod": "^3.24.2"
+    "express": "^4.18.3"
   },
   "devDependencies": {
-    "@types/bcrypt": "^5.0.2",
-    "@types/express": "^5.0.2",
-    "@types/jsonwebtoken": "^9.0.9",
-    "@types/pg": "^8.20.0",
-    "prisma": "^7.8.0",
-    "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.1",
+    "@types/supertest": "^7.2.1",
+    "@vitest/coverage-v8": "^1.6.1",
+    "supertest": "^7.2.2",
+    "typescript": "^7.0.2",
+    "vitest": "^1.6.1"
   }
 }
