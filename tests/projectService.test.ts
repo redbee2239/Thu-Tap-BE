@@ -11,20 +11,20 @@ function projectRepo(): ProjectRepo {
   };
 }
 
-describe('projectService', () => {
-  it('creates project for an authenticated user', () => {
+describe('dịch vụ dự án', () => {
+  it('tạo dự án cho người dùng đã đăng nhập', () => {
     const repo = projectRepo();
 
-    const project = createProjectService(repo).createProject(user, { name: ' Demo ' });
+    const project = createProjectService(repo).createProject(user, { name: ' Ví dụ ' });
 
-    expect(project).toMatchObject({ name: 'Demo', ownerId: 'u1' });
+    expect(project).toMatchObject({ name: 'Ví dụ', ownerId: 'u1' });
   });
 
-  it('rejects missing user', () => {
-    expect(() => createProjectService(projectRepo()).createProject(null, { name: 'Demo' })).toThrow('Unauthorized');
+  it('từ chối khi chưa đăng nhập', () => {
+    expect(() => createProjectService(projectRepo()).createProject(null, { name: 'Demo' })).toThrow('Chưa đăng nhập');
   });
 
-  it('rejects short project name', () => {
-    expect(() => createProjectService(projectRepo()).createProject(user, { name: 'x' })).toThrow('Project name');
+  it('từ chối tên dự án quá ngắn', () => {
+    expect(() => createProjectService(projectRepo()).createProject(user, { name: 'x' })).toThrow('Tên dự án');
   });
 });

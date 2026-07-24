@@ -8,14 +8,14 @@ import type { PublicUser } from './types.js';
 type AuthedRequest = Request & { user?: PublicUser | null };
 
 function statusFor(error: Error): number {
-  if (error.message === 'Unauthorized' || error.message === 'Invalid token') return 401;
-  if (error.message === 'Forbidden') return 403;
-  if (error.message.includes('required') || error.message.includes('characters')) return 400;
+  if (error.message === 'Chưa đăng nhập' || error.message === 'Token không hợp lệ') return 401;
+  if (error.message === 'Không có quyền') return 403;
+  if (error.message.includes('bắt buộc') || error.message.includes('ký tự')) return 400;
   return 404;
 }
 
 function asError(error: unknown): Error {
-  return error instanceof Error ? error : new Error('Unknown error');
+  return error instanceof Error ? error : new Error('Lỗi không xác định');
 }
 
 export function createApp() {

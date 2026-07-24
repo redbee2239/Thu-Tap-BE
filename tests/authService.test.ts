@@ -13,8 +13,8 @@ function userRepo(users: User[] = []): UserRepo {
   };
 }
 
-describe('authService', () => {
-  it('registers a new user', () => {
+describe('dịch vụ tài khoản', () => {
+  it('đăng ký người dùng mới', () => {
     const repo = userRepo();
     const user = createAuthService(repo).register({ email: 'a@test.com', password: 'secret' });
 
@@ -22,13 +22,13 @@ describe('authService', () => {
     expect(repo.create).toHaveBeenCalledOnce();
   });
 
-  it('rejects duplicate email', () => {
+  it('từ chối email trùng', () => {
     const repo = userRepo([{ id: 'u1', email: 'a@test.com', passwordHash: 'x', role: 'OWNER' }]);
 
-    expect(() => createAuthService(repo).register({ email: 'a@test.com', password: 'secret' })).toThrow('Email already exists');
+    expect(() => createAuthService(repo).register({ email: 'a@test.com', password: 'secret' })).toThrow('Email đã tồn tại');
   });
 
-  it('logs in and authenticates token', () => {
+  it('đăng nhập và xác thực token', () => {
     const service = createAuthService(userRepo());
     service.register({ email: 'a@test.com', password: 'secret' });
 
@@ -37,12 +37,12 @@ describe('authService', () => {
     expect(service.authenticate(token)).toMatchObject({ email: 'a@test.com' });
   });
 
-  it('rejects invalid credentials and tokens', () => {
+  it('từ chối thông tin đăng nhập và token sai', () => {
     const service = createAuthService(userRepo());
     service.register({ email: 'a@test.com', password: 'secret' });
 
-    expect(() => service.login({ email: 'a@test.com', password: 'wrong' })).toThrow('Invalid credentials');
+    expect(() => service.login({ email: 'a@test.com', password: 'wrong' })).toThrow('Thông tin đăng nhập không đúng');
     const token = service.login({ email: 'a@test.com', password: 'secret' });
-    expect(() => service.authenticate(`${token}x`)).toThrow('Invalid token');
+    expect(() => service.authenticate(`${token}x`)).toThrow('Token không hợp lệ');
   });
 });

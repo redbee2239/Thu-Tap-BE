@@ -13,18 +13,18 @@ function sign(payload: TokenPayload, secret: string): string {
 
 function verify(token: string, secret: string): TokenPayload {
   const [body, signature] = token.split('.');
-  if (!body || !signature) throw new Error('Invalid token');
+  if (!body || !signature) throw new Error('Token không hợp lệ');
 
   const payload = JSON.parse(Buffer.from(body, 'base64url').toString()) as TokenPayload;
-  if (sign(payload, secret) !== token) throw new Error('Invalid token');
+  if (sign(payload, secret) !== token) throw new Error('Token không hợp lệ');
   return payload;
 }
 
 export function createAuthService(userRepo: UserRepo, { secret = 'test-secret' } = {}) {
   return {
     register({ email, password, role = 'OWNER' }: RegisterInput): PublicUser {
-      if (!email || !password) throw new Error('Email and password are required');
-      if (userRepo.findByEmail(email)) throw new Error('Email already exists');
+      if (!email || !password) throw new Error('Email và mật khẩu là bắt buộc');
+      if (userRepo.findByEmail(email)) throw new Error('Email đã tồn tại');
 
       const user: User = {
         id: crypto.randomUUID(),
@@ -39,14 +39,14 @@ export function createAuthService(userRepo: UserRepo, { secret = 'test-secret' }
     login({ email, password }: LoginInput): string {
       const user = email ? userRepo.findByEmail(email) : null;
       const passwordHash = crypto.createHash('sha256').update(password || '').digest('hex');
-      if (!user || user.passwordHash !== passwordHash) throw new Error('Invalid credentials');
+      if (!user || user.passwordHash !== passwordHash) throw new Error('Thông tin đăng nhập không đúng');
       return sign({ sub: user.id, role: user.role }, secret);
     },
 
     authenticate(token: string): PublicUser {
       const payload = verify(token, secret);
       const user = userRepo.findById(payload.sub);
-      if (!user) throw new Error('Invalid token');
+      if (!user) throw new Error('Token không hợp lệ');
       return { id: user.id, email: user.email, role: user.role };
     }
   };

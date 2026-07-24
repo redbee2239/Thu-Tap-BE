@@ -13,9 +13,9 @@ export function calculateTaskPriorityScore({ priority = 1, dueInDays = 30, block
 export function createTaskService(taskRepo: TaskRepo, projectRepo: ProjectRepo) {
   return {
     createTask(user: PublicUser | null | undefined, { projectId, title, priority, dueInDays, blocked }: CreateTaskInput): Task {
-      if (!user) throw new Error('Unauthorized');
-      if (!projectId || !projectRepo.findById(projectId)) throw new Error('Project not found');
-      if (!title || title.trim().length < 3) throw new Error('Task title must be at least 3 characters');
+      if (!user) throw new Error('Chưa đăng nhập');
+      if (!projectId || !projectRepo.findById(projectId)) throw new Error('Không tìm thấy dự án');
+      if (!title || title.trim().length < 3) throw new Error('Tên công việc phải có ít nhất 3 ký tự');
 
       const task: Task = {
         id: crypto.randomUUID(),
@@ -31,14 +31,14 @@ export function createTaskService(taskRepo: TaskRepo, projectRepo: ProjectRepo) 
     },
 
     listTasks(user: PublicUser | null | undefined, projectId: string): Task[] {
-      if (!user) throw new Error('Unauthorized');
+      if (!user) throw new Error('Chưa đăng nhập');
       return taskRepo.listByProject(projectId);
     },
 
     deleteTask(user: PublicUser | null | undefined, taskId: string): true {
-      if (!user) throw new Error('Unauthorized');
-      if (user.role === 'VIEWER') throw new Error('Forbidden');
-      if (!taskRepo.delete(taskId)) throw new Error('Task not found');
+      if (!user) throw new Error('Chưa đăng nhập');
+      if (user.role === 'VIEWER') throw new Error('Không có quyền');
+      if (!taskRepo.delete(taskId)) throw new Error('Không tìm thấy công việc');
       return true;
     }
   };
