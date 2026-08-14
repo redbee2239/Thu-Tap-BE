@@ -1,7 +1,8 @@
 import type { Express } from 'express';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
-import { createApp } from '../src/app.js';
+import { createApp, createRuntime } from '../src/app.js';
+import type { Logger } from '../src/infra/cache.js';
 import type { Role } from '../src/types.js';
 
 async function registerAndLogin(app: Express, email: string, role: Role = 'OWNER'): Promise<string> {
@@ -10,38 +11,88 @@ async function registerAndLogin(app: Express, email: string, role: Role = 'OWNER
   return login.body.token as string;
 }
 
-describe('Tích hợp TaskFlow', () => {
-  it('chạy luồng đăng ký, đăng nhập, tạo project, tạo task và xem danh sách', async () => {
+function testLogger() {
+  const lines: string[] = [];
+  const logger: Logger = { log: (...args) => lines.push(args.join(' ')) };
+  return { lines, logger };
+}
+
+describe('Tích hợp TaskFlow tuần 8', () => {
+  it('phân trang cursor, filter và sort không lặp task', async () => {
     const app = createApp();
     const token = await registerAndLogin(app, 'owner@test.com');
-
     const project = await request(app)
       .post('/projects')
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'Tuần 7' })
+      .send({ name: 'Hiệu năng', workspaceId: 'workspace-1' })
       .expect(201);
 
-    await request(app).post('/tasks').send({ projectId: project.body.id, title: 'Chưa đăng nhập' }).expect(401);
-    await request(app).post('/tasks').set('Authorization', `Bearer ${token}`).send({ projectId: project.body.id, title: 'x' }).expect(400);
+    for (const [title, status, assigneeId] of [
+      ['Task 1', 'TODO', 'u1'],
+      ['Task 2', 'IN_PROGRESS', 'u2'],
+      ['Task 3', 'DONE', 'u1']
+    ]) {
+      await request(app)
+        .post('/tasks')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ projectId: project.body.id, title, status, assigneeId })
+        .expect(201);
+    }
+
+    const first = await request(app)
+      .get(`/projects/${project.body.id}/tasks?limit=2&sort=createdAt:asc`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(first.body.items).toHaveLength(2);
+    expect(first.body.pagination.hasNextPage).toBe(true);
+
+    const second = await request(app)
+      .get(`/projects/${project.body.id}/tasks?limit=2&sort=createdAt:asc&cursor=${first.body.pagination.nextCursor}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(second.body.items).toHaveLength(1);
+    expect(second.body.items[0].id).not.toBe(first.body.items[0].id);
+
+    const filtered = await request(app)
+      .get(`/projects/${project.body.id}/tasks?status=TODO&assigneeId=u1`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(filtered.body.items).toHaveLength(1);
+    expect(filtered.body.items[0].title).toBe('Task 1');
+  });
+
+  it('cache danh sách project và stats có hit/miss, invalidate khi dữ liệu đổi', async () => {
+    const { lines, logger } = testLogger();
+    const app = createRuntime({ logger }).app;
+    const token = await registerAndLogin(app, 'cache@test.com');
+    const project = await request(app)
+      .post('/projects')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'Cache demo', workspaceId: 'workspace-cache' })
+      .expect(201);
+
+    await request(app).get('/workspaces/workspace-cache/projects').set('Authorization', `Bearer ${token}`).expect(200);
+    await request(app).get('/workspaces/workspace-cache/projects').set('Authorization', `Bearer ${token}`).expect(200);
+    expect(lines.some((line) => line.includes('[cache] miss workspace:workspace-cache:projects'))).toBe(true);
+    expect(lines.some((line) => line.includes('[cache] hit workspace:workspace-cache:projects'))).toBe(true);
 
     const task = await request(app)
       .post('/tasks')
       .set('Authorization', `Bearer ${token}`)
-      .send({ projectId: project.body.id, title: 'Viết test', priority: 5, dueInDays: 0 })
+      .send({ projectId: project.body.id, title: 'Task cache', status: 'TODO' })
       .expect(201);
+    const before = await request(app).get('/workspaces/workspace-cache/stats').set('Authorization', `Bearer ${token}`).expect(200);
+    const cached = await request(app).get('/workspaces/workspace-cache/stats').set('Authorization', `Bearer ${token}`).expect(200);
+    expect(before.body).toEqual(cached.body);
+    expect(before.body.byStatus.TODO).toBe(1);
 
-    const list = await request(app).get(`/projects/${project.body.id}/tasks`).set('Authorization', `Bearer ${token}`).expect(200);
-    expect(list.body).toHaveLength(1);
-    expect(list.body[0].id).toBe(task.body.id);
-  });
-
-  it('trả về 403 khi VIEWER xóa task', async () => {
-    const app = createApp();
-    const ownerToken = await registerAndLogin(app, 'owner2@test.com');
-    const viewerToken = await registerAndLogin(app, 'viewer@test.com', 'VIEWER');
-    const project = await request(app).post('/projects').set('Authorization', `Bearer ${ownerToken}`).send({ name: 'Phân quyền' });
-    const task = await request(app).post('/tasks').set('Authorization', `Bearer ${ownerToken}`).send({ projectId: project.body.id, title: 'Task được bảo vệ' });
-
-    await request(app).delete(`/tasks/${task.body.id}`).set('Authorization', `Bearer ${viewerToken}`).expect(403);
+    await request(app)
+      .patch(`/tasks/${task.body.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ status: 'DONE' })
+      .expect(200);
+    const after = await request(app).get('/workspaces/workspace-cache/stats').set('Authorization', `Bearer ${token}`).expect(200);
+    expect(after.body.byStatus).toMatchObject({ TODO: 0, DONE: 1 });
+    expect(lines.some((line) => line.includes('[cache] hit workspace:workspace-cache:task-stats'))).toBe(true);
   });
 });

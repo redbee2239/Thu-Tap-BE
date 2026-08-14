@@ -15,15 +15,20 @@ function verify(token: string, secret: string): TokenPayload {
   const [body, signature] = token.split('.');
   if (!body || !signature) throw new Error('Token không hợp lệ');
 
-  const payload = JSON.parse(Buffer.from(body, 'base64url').toString()) as TokenPayload;
-  if (sign(payload, secret) !== token) throw new Error('Token không hợp lệ');
-  return payload;
+  try {
+    const payload = JSON.parse(Buffer.from(body, 'base64url').toString()) as TokenPayload;
+    if (sign(payload, secret) !== token) throw new Error('Token không hợp lệ');
+    return payload;
+  } catch {
+    throw new Error('Token không hợp lệ');
+  }
 }
 
 export function createAuthService(userRepo: UserRepo, { secret = 'test-secret' } = {}) {
   return {
     register({ email, password, role = 'OWNER' }: RegisterInput): PublicUser {
       if (!email || !password) throw new Error('Email và mật khẩu là bắt buộc');
+      if (role !== 'OWNER' && role !== 'VIEWER') throw new Error('Vai trò không hợp lệ');
       if (userRepo.findByEmail(email)) throw new Error('Email đã tồn tại');
 
       const user: User = {
