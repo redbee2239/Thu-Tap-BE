@@ -1,0 +1,34 @@
+{
+  "name": "taskflow-week-9",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "bullmq": "^5.56.2",
+    "express": "^4.18.3",
+    "pg": "^8.22.0",
+    "redis": "^5.8.2",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.1",
+    "@types/pg": "^8.20.0",
+    "@types/supertest": "^7.2.1",
+    "@types/swagger-ui-express": "^4.1.8",
+    "supertest": "^7.2.2",
+    "tsx": "^4.20.3",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}

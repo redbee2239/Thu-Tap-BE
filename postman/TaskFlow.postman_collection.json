@@ -1,0 +1,90 @@
+{
+  "info": {
+    "name": "TaskFlow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" },
+    { "key": "projectId", "value": "" },
+    { "key": "taskId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/health" }
+    },
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"owner@example.com\",\n  \"password\": \"secret\",\n  \"role\": \"OWNER\"\n}" },
+        "url": "{{baseUrl}}/auth/register"
+      }
+    },
+    {
+      "name": "Login",
+      "event": [{ "listen": "test", "script": { "exec": ["pm.collectionVariables.set('token', pm.response.json().token);"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"owner@example.com\",\n  \"password\": \"secret\"\n}" },
+        "url": "{{baseUrl}}/auth/login"
+      }
+    },
+    {
+      "name": "Create project",
+      "event": [{ "listen": "test", "script": { "exec": ["pm.collectionVariables.set('projectId', pm.response.json().id);"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Week 9\",\n  \"workspaceId\": \"demo\"\n}" },
+        "url": "{{baseUrl}}/projects"
+      }
+    },
+    {
+      "name": "Create task",
+      "event": [{ "listen": "test", "script": { "exec": ["pm.collectionVariables.set('taskId', pm.response.json().id);"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"projectId\": \"{{projectId}}\",\n  \"title\": \"Ship Docker stack\"\n}" },
+        "url": "{{baseUrl}}/tasks"
+      }
+    },
+    {
+      "name": "List project tasks",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/projects/{{projectId}}/tasks"
+      }
+    },
+    {
+      "name": "Workspace stats",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/workspaces/demo/stats"
+      }
+    },
+    {
+      "name": "Update task",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"DONE\"\n}" },
+        "url": "{{baseUrl}}/tasks/{{taskId}}"
+      }
+    },
+    {
+      "name": "Delete task",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/tasks/{{taskId}}"
+      }
+    }
+  ]
+}
