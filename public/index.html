@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TaskFlow</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main class="container">
+    <section class="card auth-card" id="authView" aria-labelledby="authTitle">
+      <div class="auth-heading">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <p class="eyebrow">TaskFlow</p>
+          <h1 id="authTitle">Đăng nhập TaskFlow</h1>
+        </div>
+      </div>
+      <p class="auth-copy">Sắp xếp việc cần làm, giữ tiến độ rõ ràng và hoàn thành đúng hạn.</p>
+      <form id="authForm">
+        <label id="nameField" hidden>Họ tên<input id="authName" type="text" autocomplete="name" maxlength="80"></label>
+        <label>Email<input id="authEmail" type="email" autocomplete="email" required maxlength="120"></label>
+        <label>Mật khẩu<input id="authPassword" type="password" autocomplete="current-password" required minlength="8" maxlength="200"></label>
+        <label id="confirmPasswordField" hidden>Xác nhận mật khẩu<input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="200"></label>
+        <button id="authButton" type="submit">Đăng nhập</button>
+      </form>
+      <p class="message" id="authMessage" role="status" aria-live="polite"></p>
+      <button class="link-button" id="switchAuth" type="button">Chưa có tài khoản? Đăng ký</button>
+    </section>
+
+    <section id="appView" hidden aria-label="Không gian làm việc TaskFlow">
+      <header class="header">
+        <div class="header-identity">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div>
+            <p class="eyebrow">Không gian làm việc</p>
+            <h1>TaskFlow</h1>
+            <p class="header-subtitle">Xin chào, <span id="userName"></span></p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="secondary-button" id="accountButton" type="button">Tài khoản</button>
+          <button class="secondary-button" id="logoutButton" type="button">Đăng xuất</button>
+        </div>
+      </header>
+
+      <section class="stats" aria-label="Tổng quan công việc">
+        <div class="stat-card"><span>Tổng công việc</span><strong id="totalCount">0</strong><small>Toàn bộ nhiệm vụ</small></div>
+        <div class="stat-card"><span>Cần làm</span><strong id="todoCount">0</strong><small>Chưa bắt đầu</small></div>
+        <div class="stat-card"><span>Đang làm</span><strong id="progressCount">0</strong><small>Đang tập trung</small></div>
+        <div class="stat-card"><span>Hoàn thành</span><strong id="doneCount">0</strong><small>Đã khép lại</small></div>
+      </section>
+
+      <div class="dashboard-grid" id="appContent">
+        <section class="card project-card" aria-labelledby="projectHeading">
+          <h2 id="projectHeading">Dự án</h2>
+          <p class="section-copy">Chọn không gian đang làm việc hoặc tạo một dự án mới.</p>
+          <div class="project-controls">
+            <label class="field-label" for="workspaceSelect">Workspace đang mở</label>
+            <select id="workspaceSelect"></select>
+            <button id="renameWorkspaceButton" type="button" hidden>Đổi tên workspace</button>
+            <button class="danger" id="deleteWorkspaceButton" type="button" hidden>Xóa workspace</button>
+            <div id="workspaceCreateControls">
+              <label class="field-label" for="workspaceName">Tạo workspace mới</label>
+              <form id="workspaceForm" class="inline-form">
+                <input id="workspaceName" placeholder="Ví dụ: Phòng kỹ thuật" required minlength="3" maxlength="80">
+                <button type="submit">Tạo workspace</button>
+              </form>
+            </div>
+            <label class="field-label" for="projectSelect">Dự án đang mở</label>
+            <select id="projectSelect"></select>
+            <button id="renameProjectButton" type="button" hidden>Đổi tên dự án</button>
+            <button class="danger" id="deleteProjectButton" type="button" hidden>Xóa dự án</button>
+            <div id="projectCreateControls">
+              <label class="field-label" for="projectName">Tạo dự án mới</label>
+              <form id="projectForm" class="inline-form">
+                <input id="projectName" placeholder="Ví dụ: Website công ty" required minlength="3" maxlength="80">
+                <button type="submit">Tạo dự án</button>
+              </form>
+            </div>
+            <div id="memberControls">
+              <label class="field-label" for="memberEmail">Thêm user vào workspace</label>
+              <form id="memberForm" class="inline-form">
+                <input id="memberEmail" type="email" placeholder="Email tài khoản user" required maxlength="120">
+                <button type="submit">Thêm user</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <section class="card task-form-card" id="taskFormCard" aria-labelledby="taskFormHeading">
+          <h2 id="taskFormHeading">Thêm công việc</h2>
+          <p class="section-copy">Ghi nhanh việc cần làm để không bỏ lỡ bước tiếp theo.</p>
+          <form id="taskForm" class="form-grid">
+            <label class="wide">Tên công việc (bắt buộc)<input id="taskTitle" required minlength="3" maxlength="120"></label>
+            <label class="wide">Mô tả (bắt buộc)<textarea id="taskDescription" required maxlength="1000" rows="2" placeholder="Thêm bối cảnh hoặc kết quả mong muốn"></textarea></label>
+            <label>Trạng thái<select id="taskStatus"><option value="TODO">Cần làm</option><option value="IN_PROGRESS">Đang làm</option><option value="DONE">Hoàn thành</option></select></label>
+            <label>Ưu tiên<select id="taskPriority"><option value="1">1 - Thấp</option><option value="2">2</option><option value="3" selected>3 - Bình thường</option><option value="4">4</option><option value="5">5 - Cao</option></select></label>
+            <label>Ngày hạn (bắt buộc)<input id="taskDueDate" type="date" required></label>
+            <fieldset class="wide assignee-field">
+              <legend>Giao cho user</legend>
+              <span class="field-hint">Tìm theo tên hoặc email, rồi chọn nhiều người.</span>
+              <input class="assignee-search" id="assigneeSearch" type="search" placeholder="Tìm user để giao việc" aria-label="Tìm user để giao việc">
+              <div class="assignee-summary" id="assigneeCount" aria-live="polite">Chưa chọn user</div>
+              <div class="assignee-list" id="taskAssignees"></div>
+              <span class="assignee-empty" id="assigneeEmpty" hidden>Không tìm thấy user phù hợp.</span>
+            </fieldset>
+            <button class="wide primary-action" type="submit">Tạo và giao việc</button>
+          </form>
+        </section>
+      </div>
+
+      <section class="card list-card" aria-labelledby="taskListHeading">
+        <h2 id="taskListHeading">Danh sách công việc</h2>
+        <p class="section-copy">Lọc theo trạng thái hoặc tìm nhanh theo nội dung công việc.</p>
+        <div class="row task-filters">
+          <label class="sr-only" for="searchInput">Tìm công việc</label>
+          <input id="searchInput" type="search" placeholder="Tìm công việc" aria-label="Tìm công việc">
+          <select id="statusFilter"><option value="">Task chưa hoàn thành</option><option value="TODO">Cần làm</option><option value="IN_PROGRESS">Đang làm</option><option value="DONE">Đã hoàn thành</option></select>
+        </div>
+        <ul id="taskList" aria-label="Các công việc" aria-live="polite"></ul>
+        <button id="loadMoreButton" type="button" hidden>Tải thêm công việc</button>
+      </section>
+      <section class="card list-card" id="completionHistoryCard" aria-labelledby="completionHistoryHeading" hidden>
+        <h2 id="completionHistoryHeading">Lịch sử hoàn thành</h2>
+        <p class="section-copy">Các task đã hoàn thành và tài khoản xác nhận.</p>
+        <ul id="completionHistory" aria-label="Lịch sử hoàn thành"></ul>
+      </section>
+      <p class="message" id="appMessage" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+  <dialog class="rename-dialog" id="renameDialog" aria-labelledby="renameDialogTitle" aria-describedby="renameDialogCopy">
+    <form id="renameDialogForm" novalidate>
+      <div class="rename-dialog-header">
+        <span class="rename-dialog-mark" aria-hidden="true">T</span>
+        <div>
+          <p class="eyebrow">TaskFlow</p>
+          <h2 id="renameDialogTitle">Đổi tên</h2>
+        </div>
+      </div>
+      <p class="rename-dialog-copy" id="renameDialogCopy">Nhập tên mới để tiếp tục.</p>
+      <label for="renameDialogInput">Tên mới
+        <input id="renameDialogInput" type="text" required minlength="3" maxlength="80" autocomplete="off">
+      </label>
+      <p class="rename-dialog-error" id="renameDialogError" role="alert" hidden></p>
+      <div class="rename-dialog-actions">
+        <button class="rename-dialog-cancel" id="renameDialogCancel" type="button">Hủy</button>
+        <button id="renameDialogSave" type="submit">Lưu thay đổi</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog class="rename-dialog task-edit-dialog" id="taskEditDialog" aria-labelledby="taskEditDialogTitle" aria-describedby="taskEditDialogCopy">
+    <form id="taskEditForm" class="form-grid">
+      <div class="rename-dialog-header wide">
+        <span class="rename-dialog-mark" aria-hidden="true">T</span>
+        <div>
+          <p class="eyebrow">TaskFlow</p>
+          <h2 id="taskEditDialogTitle">Sửa công việc</h2>
+        </div>
+      </div>
+      <p class="rename-dialog-copy wide" id="taskEditDialogCopy">Cập nhật thông tin và người thực hiện công việc.</p>
+      <label class="wide">Tên công việc<input id="taskEditTitle" required minlength="3" maxlength="120"></label>
+      <label class="wide">Mô tả<textarea id="taskEditDescription" required maxlength="1000" rows="3"></textarea></label>
+      <label>Trạng thái<select id="taskEditStatus"><option value="TODO">Cần làm</option><option value="IN_PROGRESS">Đang làm</option><option value="DONE">Hoàn thành</option></select></label>
+      <label>Ưu tiên<select id="taskEditPriority"><option value="1">1 - Thấp</option><option value="2">2</option><option value="3">3 - Bình thường</option><option value="4">4</option><option value="5">5 - Cao</option></select></label>
+      <label class="wide">Ngày hạn<input id="taskEditDueDate" type="date" required></label>
+      <fieldset class="wide assignee-field">
+        <legend>Người thực hiện</legend>
+        <span class="field-hint">Chọn một hoặc nhiều user được giao task.</span>
+        <input class="assignee-search" id="taskEditAssigneeSearch" type="search" placeholder="Tìm user để giao việc" aria-label="Tìm user để giao việc">
+        <div class="assignee-list" id="taskEditAssignees"></div>
+        <span class="assignee-empty" id="taskEditAssigneeEmpty" hidden>Không tìm thấy user phù hợp.</span>
+      </fieldset>
+      <p class="rename-dialog-error wide" id="taskEditError" role="alert" hidden></p>
+      <div class="rename-dialog-actions wide">
+        <button class="rename-dialog-cancel" id="taskEditCancel" type="button">Hủy</button>
+        <button id="taskEditSave" type="submit">Lưu thay đổi</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog class="rename-dialog" id="accountDialog" aria-labelledby="accountDialogTitle" aria-describedby="accountDialogCopy">
+    <form id="accountForm">
+      <div class="rename-dialog-header">
+        <span class="rename-dialog-mark" aria-hidden="true">T</span>
+        <div>
+          <p class="eyebrow">TaskFlow</p>
+          <h2 id="accountDialogTitle">Tài khoản</h2>
+        </div>
+      </div>
+      <p class="rename-dialog-copy" id="accountDialogCopy">Cập nhật tên hiển thị hoặc đổi mật khẩu.</p>
+      <label>Tên hiển thị (username)<input id="accountName" type="text" required minlength="2" maxlength="80" autocomplete="nickname"></label>
+      <span class="field-hint">Email đăng nhập không thay đổi.</span>
+      <label>Mật khẩu hiện tại<input id="accountCurrentPassword" type="password" minlength="8" maxlength="200" autocomplete="current-password"></label>
+      <label>Mật khẩu mới<input id="accountNewPassword" type="password" minlength="8" maxlength="200" autocomplete="new-password"></label>
+      <label>Xác nhận mật khẩu mới<input id="accountConfirmPassword" type="password" minlength="8" maxlength="200" autocomplete="new-password"></label>
+      <p class="rename-dialog-error" id="accountError" role="alert" hidden></p>
+      <div class="rename-dialog-actions">
+        <button class="rename-dialog-cancel" id="accountCancel" type="button">Hủy</button>
+        <button id="accountSave" type="submit">Lưu thay đổi</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>
